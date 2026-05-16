@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 /// Sign up at resend.com, get your API key, add to your Vercel env vars
 class EmailService {
   // Your Vercel proxy endpoint (keeps API key server-side)
-  static const String _baseUrl = 'konateallaman-chaseit-flutter-gkc38vlkn-konateallamans-projects.vercel.app';
+  static const String _baseUrl = 'https://konateallaman-chaseit-flutter-oogu.vercel.app';
 
   static Future<bool> sendVerificationEmail({
     required String toEmail,

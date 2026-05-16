@@ -29104,7 +29104,7 @@ a7_(a,b,c){return A.aSd(a,b,c)},
 aSd(a,b,c){var s=0,r=A.C(t.y),q,p=2,o=[],n,m,l,k,j,i
 var $async$a7_=A.D(function(d,e){if(d===1){o.push(e)
 s=p}for(;;)switch(s){case 0:p=4
-m=A.hp("https://chaseit-flutter-3x5yvzvw9-konateallamans-projects.vercel.app/api/send-email")
+m=A.hp("https://konateallaman-chaseit-flutter-oogu.vercel.app/api/send-email")
 l=t.N
 k=A.ah(["Content-Type","application/json"],l,l)
 s=7
