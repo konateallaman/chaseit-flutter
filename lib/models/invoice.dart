@@ -47,7 +47,7 @@ class Invoice {
     return DateTime.now().difference(due_).inDays;
   }
 
-  static double _toDouble(dynamic v) {
+  static double toDouble(dynamic v) {
     if (v == null) return 0.0;
     if (v is double) return v;
     if (v is int) return v.toDouble();
@@ -55,19 +55,36 @@ class Invoice {
   }
 
   Map<String, dynamic> toMap() => {
-    'id': id, 'client': client, 'email': email,
-    'amount': amount, 'paidAmount': paidAmount, 'due': due,
-    'desc': desc, 'sender': sender, 'num': num, 'seq': seq,
-    'phone': phone, 'chases': chases, 'paid': paid ? 1 : 0, 'created': created,
+    'id': id,
+    'client': client,
+    'email': email,
+    'amount': amount,
+    'paidAmount': paidAmount,
+    'due': due,
+    'desc': desc,
+    'sender': sender,
+    'num': num,
+    'seq': seq,
+    'phone': phone,
+    'chases': chases,
+    'paid': paid ? 1 : 0,
+    'created': created,
   };
 
   factory Invoice.fromMap(Map<String, dynamic> m) => Invoice(
-    id: m['id'] as String, client: m['client'] as String, email: m['email'] as String,
-    amount: _toDouble(m['amount']), paidAmount: _toDouble(m['paidAmount']),
-    due: m['due'] as String, desc: (m['desc'] ?? '') as String,
-    sender: (m['sender'] ?? '') as String, num: (m['num'] ?? '') as String,
-    seq: (m['seq'] ?? 'gentle') as String, phone: (m['phone'] ?? '') as String,
-    chases: (m['chases'] ?? 0) as int, paid: ((m['paid'] ?? 0) as int) == 1,
+    id: m['id'] as String,
+    client: m['client'] as String,
+    email: m['email'] as String,
+    amount: toDouble(m['amount']),
+    paidAmount: toDouble(m['paidAmount']),
+    due: m['due'] as String,
+    desc: (m['desc'] ?? '') as String,
+    sender: (m['sender'] ?? '') as String,
+    num: (m['num'] ?? '') as String,
+    seq: (m['seq'] ?? 'gentle') as String,
+    phone: (m['phone'] ?? '') as String,
+    chases: (m['chases'] ?? 0) as int,
+    paid: ((m['paid'] ?? 0) as int) == 1,
     created: m['created'] as String,
   );
 
@@ -76,10 +93,19 @@ class Invoice {
     String? due, String? desc, String? sender, String? num,
     String? seq, String? phone, int? chases, bool? paid,
   }) => Invoice(
-    id: id, client: client ?? this.client, email: email ?? this.email,
-    amount: amount ?? this.amount, paidAmount: paidAmount ?? this.paidAmount,
-    due: due ?? this.due, desc: desc ?? this.desc, sender: sender ?? this.sender,
-    num: num ?? this.num, seq: seq ?? this.seq, phone: phone ?? this.phone,
-    chases: chases ?? this.chases, paid: paid ?? this.paid, created: created,
+    id: id,
+    client: client ?? this.client,
+    email: email ?? this.email,
+    amount: amount ?? this.amount,
+    paidAmount: paidAmount ?? this.paidAmount,
+    due: due ?? this.due,
+    desc: desc ?? this.desc,
+    sender: sender ?? this.sender,
+    num: num ?? this.num,
+    seq: seq ?? this.seq,
+    phone: phone ?? this.phone,
+    chases: chases ?? this.chases,
+    paid: paid ?? this.paid,
+    created: created,
   );
 }

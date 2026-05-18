@@ -2,18 +2,19 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_profile.dart';
+import 'supabase_service.dart';
 
 class AuthService {
-  static const _profileKey   = 'chaseit_profile';
   static const _passwordKey  = 'chaseit_password';
   static const _loggedInKey  = 'chaseit_logged_in';
-  static const _pendingKey   = 'chaseit_pending'; // pending registration
-  static const _codeKey      = 'chaseit_vcode';   // verification code
+  static const _profileIdKey = 'chaseit_profile_id';
+  static const _pendingKey   = 'chaseit_pending';
+  static const _codeKey      = 'chaseit_vcode';
 
-  // ── CHECK STATE ─────────────────────────────────────────
+  // ── STATE ────────────────────────────────────────────────
   static Future<bool> isRegistered() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_profileKey) != null;
+    return prefs.getString(_profileIdKey) != null;
   }
 
   static Future<bool> isLoggedIn() async {
@@ -23,13 +24,13 @@ class AuthService {
 
   static Future<UserProfile?> getProfile() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_profileKey);
-    if (raw == null) return null;
-    try { return UserProfile.fromMap(jsonDecode(raw)); } catch (_) { return null; }
+    final id = prefs.getString(_profileIdKey);
+    if (id == null) return null;
+    // Fetch fresh from Supabase
+    return await SupabaseService.getProfileById(id);
   }
 
-  // ── SAVE PENDING REGISTRATION ────────────────────────────
-  // Stores registration data + generates code — call BEFORE sending email
+  // ── PENDING REGISTRATION ─────────────────────────────────
   static Future<String> savePendingRegistration({
     required String businessName,
     required String ownerName,
@@ -40,20 +41,19 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     final code = _generateCode();
 
-    final pending = {
+    await prefs.setString(_pendingKey, jsonEncode({
       'businessName': businessName.trim(),
       'ownerName': ownerName.trim(),
       'email': email.trim().toLowerCase(),
       'phone': phone.trim(),
       'passwordHash': _hash(password),
-    };
-
-    await prefs.setString(_pendingKey, jsonEncode(pending));
+    }));
     await prefs.setString(_codeKey, code);
+    print('[ChaseIt] VERIFICATION CODE: $code');
     return code;
   }
 
-  // ── VERIFY CODE & CREATE ACCOUNT ─────────────────────────
+  // ── VERIFY & CREATE ACCOUNT ──────────────────────────────
   static Future<String?> verifyAndCreateAccount(String inputCode) async {
     final prefs = await SharedPreferences.getInstance();
     final storedCode = prefs.getString(_codeKey) ?? '';
@@ -64,8 +64,9 @@ class AuthService {
 
     final pending = jsonDecode(pendingRaw) as Map<String, dynamic>;
 
-    final profile = UserProfile(
-      id: _generateId(),
+    // Create profile in Supabase
+    final profile = await SupabaseService.insertProfile(UserProfile(
+      id: '',
       businessName: pending['businessName'],
       ownerName: pending['ownerName'],
       email: pending['email'],
@@ -73,49 +74,57 @@ class AuthService {
       plan: 'free',
       createdAt: DateTime.now().toIso8601String(),
       emailVerified: true,
-    );
+    ));
 
-    await prefs.setString(_profileKey, jsonEncode(profile.toMap()));
+    if (profile == null) return 'Failed to create account. Please try again.';
+
+    // Save locally
+    await prefs.setString(_profileIdKey, profile.id);
     await prefs.setString(_passwordKey, pending['passwordHash']);
     await prefs.setBool(_loggedInKey, true);
     await prefs.remove(_pendingKey);
     await prefs.remove(_codeKey);
-    return null; // success
+
+    // Init settings in Supabase
+    await SupabaseService.upsertSettings(profile.id, 0, 1);
+
+    return null;
   }
 
   // ── LOGIN ────────────────────────────────────────────────
   static Future<String?> login(String email, String password) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_profileKey);
-    if (raw == null) return 'No account found. Please register first.';
 
-    final profile = UserProfile.fromMap(jsonDecode(raw));
-    if (profile.email != email.trim().toLowerCase()) return 'Email not found.';
+    // Fetch profile from Supabase
+    final profile = await SupabaseService.getProfile(email.trim().toLowerCase());
+    if (profile == null) return 'No account found with this email.';
 
-    final storedHash = prefs.getString(_passwordKey) ?? '';
-    if (storedHash != _hash(password)) return 'Incorrect password.';
+    // Check password
+    final storedHash = prefs.getString(_passwordKey);
+    if (storedHash == null || storedHash != _hash(password)) {
+      // Password hash might be on a different device — store it
+      // For now we store the hash locally per device
+      return 'Incorrect password. If you registered on another device, you need to reset your password.';
+    }
 
+    await prefs.setString(_profileIdKey, profile.id);
     await prefs.setBool(_loggedInKey, true);
     return null;
   }
 
   // ── UPDATE PROFILE ───────────────────────────────────────
   static Future<String?> updateProfile(UserProfile updated) async {
-    final prefs = await SharedPreferences.getInstance();
     if (updated.businessName.trim().isEmpty) return 'Business name is required';
     if (updated.ownerName.trim().isEmpty) return 'Your name is required';
-    await prefs.setString(_profileKey, jsonEncode(updated.toMap()));
-    return null;
+    final ok = await SupabaseService.updateProfile(updated);
+    return ok ? null : 'Failed to update profile.';
   }
 
-  // ── UPDATE AVATAR URL ────────────────────────────────────
+  // ── UPDATE AVATAR ────────────────────────────────────────
   static Future<void> updateAvatarUrl(String url) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_profileKey);
-    if (raw == null) return;
-    final profile = UserProfile.fromMap(jsonDecode(raw));
-    final updated = profile.copyWith(avatarUrl: url);
-    await prefs.setString(_profileKey, jsonEncode(updated.toMap()));
+    final id = prefs.getString(_profileIdKey);
+    if (id != null) await SupabaseService.updateAvatarUrl(id, url);
   }
 
   // ── CHANGE PASSWORD ──────────────────────────────────────
@@ -140,18 +149,14 @@ class AuthService {
   // ── DELETE ACCOUNT ───────────────────────────────────────
   static Future<void> deleteAccount() async {
     final prefs = await SharedPreferences.getInstance();
+    final id = prefs.getString(_profileIdKey);
+    if (id != null) await SupabaseService.deleteProfile(id);
     await prefs.clear();
   }
 
   // ── HELPERS ──────────────────────────────────────────────
-  static String _generateCode() {
-    final r = Random();
-    return List.generate(6, (_) => r.nextInt(10)).join();
-  }
-
-  static String _generateId() =>
-      DateTime.now().millisecondsSinceEpoch.toString() +
-      Random().nextInt(9999).toString();
+  static String _generateCode() =>
+      List.generate(6, (_) => Random().nextInt(10)).join();
 
   static String _hash(String input) {
     int hash = 5381;
