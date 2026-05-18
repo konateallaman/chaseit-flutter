@@ -46,7 +46,7 @@ class SupabaseService {
     return null;
   }
 
-  static Future<UserProfile?> insertProfile(UserProfile p) async {
+  static Future<UserProfile?> insertProfile(UserProfile p, {String passwordHash = ''}) async {
     final res = await http.post(
       Uri.parse('$_url/rest/v1/profiles'),
       headers: _headers,
@@ -58,6 +58,7 @@ class SupabaseService {
         'plan': p.plan,
         'avatar_url': p.avatarUrl,
         'email_verified': p.emailVerified,
+        'password_hash': passwordHash,
       }),
     );
     if (res.statusCode == 201) {
@@ -103,12 +104,23 @@ class SupabaseService {
 
   static Future<String?> getPasswordHash(String email) async {
     final res = await http.get(
-      Uri.parse('$_url/rest/v1/profiles?email=eq.$email&select=id&limit=1'),
+      Uri.parse('$_url/rest/v1/profiles?email=eq.$email&select=password_hash&limit=1'),
       headers: _headers,
     );
-    // We store password hash in shared_preferences locally for security
-    // Supabase only stores profile data
+    if (res.statusCode == 200) {
+      final list = jsonDecode(res.body) as List;
+      if (list.isNotEmpty) return list[0]['password_hash'] as String?;
+    }
     return null;
+  }
+
+  static Future<bool> updatePasswordHash(String id, String hash) async {
+    final res = await http.patch(
+      Uri.parse('$_url/rest/v1/profiles?id=eq.$id'),
+      headers: _headers,
+      body: jsonEncode({'password_hash': hash}),
+    );
+    return res.statusCode == 200 || res.statusCode == 204;
   }
 
   // ── INVOICES ────────────────────────────────────────────
