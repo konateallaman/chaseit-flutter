@@ -16,6 +16,7 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/account_screen.dart';
 import 'screens/landing_screen.dart';
+import 'screens/automation_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,11 +66,12 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _tab = 0;
 
-  final _labels = ['Dashboard', 'Invoices', 'Clients', 'Settings'];
+  final _labels = ['Dashboard', 'Invoices', 'Clients', 'Auto', 'Settings'];
   final _icons  = [
     Icons.grid_view_rounded,
     Icons.receipt_long_rounded,
     Icons.people_rounded,
+    Icons.bolt_rounded,
     Icons.settings_rounded,
   ];
 
@@ -78,7 +80,8 @@ class _MainShellState extends State<MainShell> {
       case 0: return const DashboardScreen();
       case 1: return const InvoicesScreen();
       case 2: return const ClientsScreen();
-      case 3: return const SettingsScreen();
+      case 3: return const AutomationScreen();
+      case 4: return const SettingsScreen();
       default: return const DashboardScreen();
     }
   }
@@ -242,11 +245,11 @@ class _MainShellState extends State<MainShell> {
                   const Padding(padding: EdgeInsets.only(left: 8, bottom: 6, top: 4),
                       child: Text('MAIN', style: TextStyle(fontFamily: 'Syne', fontSize: 9,
                           color: Color(0x33FFFFFF), letterSpacing: 1.5))),
-                  ...[0, 1, 2].map(_sidebarItem),
+                  ...[0, 1, 2, 3].map(_sidebarItem),
                   const Padding(padding: EdgeInsets.only(left: 8, bottom: 6, top: 14),
                       child: Text('ACCOUNT', style: TextStyle(fontFamily: 'Syne', fontSize: 9,
                           color: Color(0x33FFFFFF), letterSpacing: 1.5))),
-                  _sidebarItem(3),
+                  _sidebarItem(4),
                 ]),
               ),
             ),
