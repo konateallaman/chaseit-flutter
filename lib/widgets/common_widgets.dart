@@ -288,3 +288,243 @@ Color avatarColor(String name) {
   for (final c in name.runes) h = c + ((h << 5) - h);
   return colors[h.abs() % colors.length];
 }
+
+
+// ── HOVER EFFECT WRAPPER ──────────────────────────────────
+class HoverWidget extends StatefulWidget {
+  final Widget child;
+  final Widget hoverChild;
+  const HoverWidget({super.key, required this.child, required this.hoverChild});
+  @override
+  State<HoverWidget> createState() => _HoverWidgetState();
+}
+class _HoverWidgetState extends State<HoverWidget> {
+  bool _hovered = false;
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: _hovered ? widget.hoverChild : widget.child,
+    );
+  }
+}
+
+// ── HOVER BUTTON ─────────────────────────────────────────
+class HoverButton extends StatefulWidget {
+  final String label;
+  final VoidCallback? onTap;
+  final Color bg;
+  final Color hoverBg;
+  final Color fg;
+  final Color hoverFg;
+  final IconData? icon;
+  final bool small;
+  final double radius;
+  final EdgeInsets? padding;
+
+  const HoverButton({
+    super.key,
+    required this.label,
+    this.onTap,
+    this.bg = AppColors.accent,
+    this.hoverBg = const Color(0xFFC0390D),
+    this.fg = Colors.white,
+    this.hoverFg = Colors.white,
+    this.icon,
+    this.small = false,
+    this.radius = 8,
+    this.padding,
+  });
+
+  @override
+  State<HoverButton> createState() => _HoverButtonState();
+}
+
+class _HoverButtonState extends State<HoverButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: widget.padding ?? EdgeInsets.symmetric(
+              horizontal: widget.small ? 12 : 16,
+              vertical: widget.small ? 7 : 10),
+          decoration: BoxDecoration(
+            color: _hovered ? widget.hoverBg : widget.bg,
+            borderRadius: BorderRadius.circular(widget.radius),
+            boxShadow: _hovered ? [BoxShadow(
+                color: widget.bg.withOpacity(0.35),
+                blurRadius: 12, offset: const Offset(0, 4))] : null,
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            if (widget.icon != null) ...[
+              Icon(widget.icon, size: widget.small ? 13 : 15,
+                  color: _hovered ? widget.hoverFg : widget.fg),
+              const SizedBox(width: 5),
+            ],
+            Text(widget.label, style: TextStyle(
+                fontFamily: 'Syne',
+                fontSize: widget.small ? 12 : 13,
+                fontWeight: FontWeight.w600,
+                color: _hovered ? widget.hoverFg : widget.fg)),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+// ── HOVER TEXT LINK ──────────────────────────────────────
+class HoverLink extends StatefulWidget {
+  final String label;
+  final VoidCallback? onTap;
+  final Color color;
+  final Color hoverColor;
+  final double fontSize;
+  final FontWeight fontWeight;
+
+  const HoverLink({
+    super.key,
+    required this.label,
+    this.onTap,
+    this.color = AppColors.accent,
+    this.hoverColor = const Color(0xFFC0390D),
+    this.fontSize = 13,
+    this.fontWeight = FontWeight.w700,
+  });
+
+  @override
+  State<HoverLink> createState() => _HoverLinkState();
+}
+
+class _HoverLinkState extends State<HoverLink> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedDefaultTextStyle(
+          duration: const Duration(milliseconds: 150),
+          style: TextStyle(
+            fontFamily: 'Syne',
+            fontSize: widget.fontSize,
+            fontWeight: widget.fontWeight,
+            color: _hovered ? widget.hoverColor : widget.color,
+            decoration: _hovered ? TextDecoration.underline : TextDecoration.none,
+            decorationColor: widget.hoverColor,
+          ),
+          child: Text(widget.label),
+        ),
+      ),
+    );
+  }
+}
+
+// ── HOVER CARD ───────────────────────────────────────────
+class HoverCard extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+  final EdgeInsets padding;
+  final double radius;
+  const HoverCard({
+    super.key,
+    required this.child,
+    this.onTap,
+    this.padding = const EdgeInsets.all(16),
+    this.radius = 12,
+  });
+  @override
+  State<HoverCard> createState() => _HoverCardState();
+}
+
+class _HoverCardState extends State<HoverCard> {
+  bool _hovered = false;
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: widget.onTap != null ? SystemMouseCursors.click : MouseCursor.defer,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: widget.padding,
+          decoration: BoxDecoration(
+            color: _hovered ? AppColors.surface2 : AppColors.surface,
+            borderRadius: BorderRadius.circular(widget.radius),
+            border: Border.all(color: _hovered ? AppColors.accent.withOpacity(0.3) : AppColors.border),
+            boxShadow: _hovered ? [BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 12, offset: const Offset(0, 4))] : null,
+          ),
+          child: widget.child,
+        ),
+      ),
+    );
+  }
+}
+
+// ── HOVER ICON BUTTON ────────────────────────────────────
+class HoverIconBtn extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback? onTap;
+  final Color color;
+  final Color hoverColor;
+  final Color? hoverBg;
+  final double size;
+  final String? tooltip;
+  const HoverIconBtn({
+    super.key,
+    required this.icon,
+    this.onTap,
+    this.color = AppColors.muted,
+    this.hoverColor = AppColors.accent,
+    this.hoverBg,
+    this.size = 20,
+    this.tooltip,
+  });
+  @override
+  State<HoverIconBtn> createState() => _HoverIconBtnState();
+}
+
+class _HoverIconBtnState extends State<HoverIconBtn> {
+  bool _hovered = false;
+  @override
+  Widget build(BuildContext context) {
+    final btn = MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: _hovered ? (widget.hoverBg ?? AppColors.accentBg) : Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Icon(widget.icon, size: widget.size,
+              color: _hovered ? widget.hoverColor : widget.color),
+        ),
+      ),
+    );
+    if (widget.tooltip != null) return Tooltip(message: widget.tooltip!, child: btn);
+    return btn;
+  }
+}

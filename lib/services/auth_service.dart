@@ -48,7 +48,6 @@ class AuthService {
       'passwordHash': _hash(password),
     }));
     await prefs.setString(_codeKey, code);
-    print('[ChaseIt] VERIFICATION CODE: $code');
     return code;
   }
 
@@ -180,7 +179,6 @@ class AuthService {
     await prefs.setString('chaseit_reset_email', email);
     await prefs.setInt('chaseit_reset_expiry',
         DateTime.now().add(const Duration(minutes: 10)).millisecondsSinceEpoch);
-    print('[ChaseIt] RESET CODE: $code');
     return code;
   }
 

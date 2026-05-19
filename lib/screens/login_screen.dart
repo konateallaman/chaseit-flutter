@@ -12,28 +12,21 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _emailCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
-  bool _obscure = true;
-  bool _loading = false;
+  final _passCtrl  = TextEditingController();
+  bool _obscure  = true;
+  bool _loading  = false;
   String? _error;
 
   @override
-  void dispose() {
-    _emailCtrl.dispose();
-    _passCtrl.dispose();
-    super.dispose();
-  }
+  void dispose() { _emailCtrl.dispose(); _passCtrl.dispose(); super.dispose(); }
 
   Future<void> _login() async {
     setState(() { _error = null; _loading = true; });
     final err = await AuthService.login(_emailCtrl.text, _passCtrl.text);
     if (!mounted) return;
     setState(() => _loading = false);
-    if (err != null) {
-      setState(() => _error = err);
-    } else {
-      Navigator.of(context).pushReplacementNamed('/home');
-    }
+    if (err != null) { setState(() => _error = err); }
+    else { Navigator.of(context).pushReplacementNamed('/home'); }
   }
 
   @override
@@ -54,23 +47,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(children: [
                     Container(
                       width: 36, height: 36,
-                      decoration: BoxDecoration(
-                        color: AppColors.accent,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                      decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(10)),
                       child: const Icon(Icons.timer_outlined, size: 20, color: Colors.white),
                     ),
                     const SizedBox(width: 10),
-                    const Text('ChaseIt',
-                        style: TextStyle(fontFamily: 'Syne', fontSize: 22,
-                            fontWeight: FontWeight.w800, color: AppColors.ink,
-                            letterSpacing: -0.5)),
+                    const Text('ChaseIt', style: TextStyle(fontFamily: 'Syne', fontSize: 22,
+                        fontWeight: FontWeight.w800, color: AppColors.ink, letterSpacing: -0.5)),
                   ]),
                   const SizedBox(height: 40),
-                  const Text('Welcome back',
-                      style: TextStyle(fontFamily: 'Syne', fontSize: 26,
-                          fontWeight: FontWeight.w800, color: AppColors.ink,
-                          letterSpacing: -0.5)),
+                  const Text('Welcome back', style: TextStyle(fontFamily: 'Syne', fontSize: 26,
+                      fontWeight: FontWeight.w800, color: AppColors.ink, letterSpacing: -0.5)),
                   const SizedBox(height: 6),
                   const Text('Sign in to your ChaseIt account.',
                       style: TextStyle(fontFamily: 'Syne', fontSize: 14, color: AppColors.muted)),
@@ -99,22 +85,25 @@ class _LoginScreenState extends State<LoginScreen> {
                       prefixIcon: const Icon(Icons.lock_outline, size: 18, color: AppColors.muted),
                       suffixIcon: GestureDetector(
                         onTap: () => setState(() => _obscure = !_obscure),
-                        child: Icon(
-                          _obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                          size: 18, color: AppColors.muted,
-                        ),
+                        child: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                            size: 18, color: AppColors.muted),
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
+
+                  // Forgot password
                   Align(
                     alignment: Alignment.centerRight,
-                    child: GestureDetector(
-                      onTap: () => Navigator.push(context,
-                          MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
-                      child: const Text('Forgot password?',
-                          style: TextStyle(fontFamily: 'Syne', fontSize: 13,
-                              fontWeight: FontWeight.w600, color: AppColors.accent)),
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () => Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
+                        child: const Text('Forgot password?',
+                            style: TextStyle(fontFamily: 'Syne', fontSize: 13,
+                                fontWeight: FontWeight.w600, color: AppColors.accent)),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -131,43 +120,39 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Row(children: [
                         const Icon(Icons.error_outline, size: 16, color: AppColors.accent),
                         const SizedBox(width: 8),
-                        Expanded(child: Text(_error!,
-                            style: const TextStyle(fontFamily: 'Syne',
-                                fontSize: 13, color: AppColors.accent))),
+                        Expanded(child: Text(_error!, style: const TextStyle(
+                            fontFamily: 'Syne', fontSize: 13, color: AppColors.accent))),
                       ]),
                     ),
 
                   SizedBox(
-                    width: double.infinity,
-                    height: 50,
+                    width: double.infinity, height: 50,
                     child: ElevatedButton(
                       onPressed: _loading ? null : _login,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.accent,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: _loading
                           ? const SizedBox(width: 20, height: 20,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white))
-                          : const Text('Sign In',
-                              style: TextStyle(fontFamily: 'Syne', fontSize: 15,
-                                  fontWeight: FontWeight.w700, color: Colors.white)),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : const Text('Sign In', style: TextStyle(fontFamily: 'Syne',
+                              fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
                     ),
                   ),
                   const SizedBox(height: 20),
 
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     const Text("Don't have an account? ",
-                        style: TextStyle(fontFamily: 'Syne', fontSize: 13,
-                            color: AppColors.muted)),
-                    GestureDetector(
-                      onTap: () => Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (_) => const RegisterScreen())),
-                      child: const Text('Register',
-                          style: TextStyle(fontFamily: 'Syne', fontSize: 13,
-                              fontWeight: FontWeight.w700, color: AppColors.accent)),
+                        style: TextStyle(fontFamily: 'Syne', fontSize: 13, color: AppColors.muted)),
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () => Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (_) => const RegisterScreen())),
+                        child: const Text('Register', style: TextStyle(fontFamily: 'Syne',
+                            fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.accent)),
+                      ),
                     ),
                   ]),
                 ],
@@ -181,8 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _label(String text) => Padding(
     padding: const EdgeInsets.only(bottom: 6),
-    child: Text(text.toUpperCase(),
-        style: const TextStyle(fontFamily: 'Syne', fontSize: 9,
-            color: AppColors.muted, letterSpacing: 1.0)),
+    child: Text(text.toUpperCase(), style: const TextStyle(fontFamily: 'Syne',
+        fontSize: 9, color: AppColors.muted, letterSpacing: 1.0)),
   );
 }
