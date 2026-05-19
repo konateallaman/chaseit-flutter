@@ -172,6 +172,32 @@ class _MainShellState extends State<MainShell> {
     ]);
   }
 
+  Future<void> _confirmLogout(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Sign Out', style: TextStyle(fontFamily: 'Syne', fontWeight: FontWeight.w700)),
+        content: const Text('Are you sure you want to sign out?',
+            style: TextStyle(fontFamily: 'Syne', fontSize: 14)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sign Out',
+                style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await AuthService.logout();
+      if (context.mounted) Navigator.of(context).pushReplacementNamed('/login');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state        = context.watch<AppState>();
@@ -223,6 +249,11 @@ class _MainShellState extends State<MainShell> {
                   _sidebarItem(3),
                 ]),
               ),
+            ),
+            // Logout button in sidebar
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 4),
+              child: _SidebarLogoutBtn(onTap: () => _confirmLogout(context)),
             ),
             // Pro card
             Padding(
@@ -298,6 +329,7 @@ class _MainShellState extends State<MainShell> {
                 onTap: () => Navigator.push(context,
                     MaterialPageRoute(builder: (_) => const InvoiceFormScreen())),
               ),
+
             ]),
           ),
           Expanded(child: _screen()),
@@ -360,6 +392,12 @@ class _MainShellState extends State<MainShell> {
                 ]),
               ),
             ),
+          ),
+          // Logout
+          IconButton(
+            onPressed: () => _confirmLogout(context),
+            tooltip: 'Logout',
+            icon: const Icon(Icons.logout, color: AppColors.muted, size: 22),
           ),
         ],
       ),
@@ -507,6 +545,46 @@ class _TopbarBtnState extends State<_TopbarBtn> {
             const SizedBox(width: 5),
             Text(widget.label, style: TextStyle(fontFamily: 'Syne', fontSize: 12,
                 fontWeight: FontWeight.w600, color: widget.color)),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+// ── SIDEBAR LOGOUT BUTTON ────────────────────────────────
+class _SidebarLogoutBtn extends StatefulWidget {
+  final VoidCallback onTap;
+  const _SidebarLogoutBtn({required this.onTap});
+  @override
+  State<_SidebarLogoutBtn> createState() => _SidebarLogoutBtnState();
+}
+
+class _SidebarLogoutBtnState extends State<_SidebarLogoutBtn> {
+  bool _hovered = false;
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+          decoration: BoxDecoration(
+            color: _hovered ? Colors.red.withOpacity(0.12) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: _hovered ? Border.all(color: Colors.red.withOpacity(0.3)) : null,
+          ),
+          child: Row(children: [
+            Icon(Icons.logout, size: 15,
+                color: _hovered ? Colors.red.shade300 : Colors.white.withOpacity(0.4)),
+            const SizedBox(width: 9),
+            Text('Sign Out', style: TextStyle(fontFamily: 'Syne', fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: _hovered ? Colors.red.shade300 : Colors.white.withOpacity(0.4))),
           ]),
         ),
       ),
