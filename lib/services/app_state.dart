@@ -171,6 +171,14 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateClient(Client c) async {
+    if (_profileId == null) return;
+    await SupabaseService.updateClient(c, _profileId!);
+    final idx = clients.indexWhere((x) => x.id == c.id);
+    if (idx != -1) clients[idx] = c;
+    notifyListeners();
+  }
+
   Future<void> deleteClient(String id) async {
     await SupabaseService.deleteClient(id);
     clients.removeWhere((c) => c.id == id);

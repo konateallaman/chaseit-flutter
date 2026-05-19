@@ -205,6 +205,21 @@ class SupabaseService {
     return null;
   }
 
+  static Future<bool> updateClient(Client c, String profileId) async {
+    final res = await http.patch(
+      Uri.parse('$_url/rest/v1/clients?id=eq.${c.id}'),
+      headers: _headers,
+      body: jsonEncode({
+        'biz': c.biz,
+        'name': c.name,
+        'email': c.email,
+        'phone': c.phone,
+        'notes': c.notes,
+      }),
+    );
+    return res.statusCode == 200 || res.statusCode == 204;
+  }
+
   static Future<bool> deleteClient(String id) async {
     final res = await http.delete(
       Uri.parse('$_url/rest/v1/clients?id=eq.$id'),
