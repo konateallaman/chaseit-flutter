@@ -29,27 +29,57 @@ class LandingScreen extends StatelessWidget {
 
   // ── NAV ─────────────────────────────────────────────────
   Widget _nav(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width >= 500;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
         color: const Color(0xFF0F0D0A),
         border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.07))),
       ),
       child: Row(children: [
+        // Logo
         Row(children: [
-          Container(width: 30, height: 30,
-              decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(8)),
-              child: const Icon(Icons.timer_outlined, size: 16, color: Colors.white)),
-          const SizedBox(width: 8),
-          const Text('ChaseIt', style: TextStyle(fontFamily: 'Syne', fontSize: 18,
+          Container(width: 28, height: 28,
+              decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(7)),
+              child: const Icon(Icons.timer_outlined, size: 14, color: Colors.white)),
+          const SizedBox(width: 7),
+          const Text('ChaseIt', style: TextStyle(fontFamily: 'Syne', fontSize: 16,
               fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: -0.5)),
         ]),
         const Spacer(),
-        _navLink('Sign in', () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const LoginScreen()))),
-        const SizedBox(width: 8),
-        _navBtn('Get started', () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const RegisterScreen()))),
+        // Sign in — text only on small screens
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const LoginScreen())),
+            child: Text(
+              'Sign in',
+              style: TextStyle(fontFamily: 'Syne', fontSize: 13,
+                  color: Colors.white.withOpacity(0.6)),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        // Get started button
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const RegisterScreen())),
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                  horizontal: isWide ? 14 : 10, vertical: 7),
+              decoration: BoxDecoration(
+                  color: AppColors.accent, borderRadius: BorderRadius.circular(8)),
+              child: Text(
+                isWide ? 'Get started' : 'Start',
+                style: const TextStyle(fontFamily: 'Syne', fontSize: 12,
+                    fontWeight: FontWeight.w700, color: Colors.white),
+              ),
+            ),
+          ),
+        ),
       ]),
     );
   }
@@ -438,7 +468,7 @@ class LandingScreen extends StatelessWidget {
           const Text('ChaseIt', style: TextStyle(fontFamily: 'Syne', fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
         ]),
         const SizedBox(height: 10),
-        Text('© 2026 ChaseIt · Built with Care · Houston, TX',
+        Text('© 2026 ChaseIt · Built with Claude AI · Houston, TX',
             style: TextStyle(fontFamily: 'Syne', fontSize: 11, color: Colors.white.withOpacity(0.22))),
       ]),
     );
