@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/invoice.dart';
 import '../services/app_state.dart';
+import '../services/email_service.dart';
 import '../services/ai_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
@@ -48,12 +49,29 @@ class _ChaseScreenState extends State<ChaseScreen> {
       return;
     }
     setState(() => _sending = true);
+
+    // Actually send the email
+    final sent = await EmailService.sendChaseEmail(
+      toEmail: widget.invoice.email,
+      toName: widget.invoice.client,
+      message: _msgController.text.trim(),
+      amount: widget.invoice.remaining,
+      due: widget.invoice.due,
+      sender: widget.invoice.sender,
+    );
+
     await context.read<AppState>().incrementChase(widget.invoice.id);
     setState(() => _sending = false);
+
     if (mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Chase sent to ${widget.invoice.client} via $_channel'), backgroundColor: AppColors.green),
+        SnackBar(
+          content: Text(sent
+              ? 'Chase sent to ${widget.invoice.client}! ✓'
+              : 'Chase recorded but email failed — check your email settings'),
+          backgroundColor: sent ? AppColors.green : AppColors.yellow,
+        ),
       );
     }
   }
@@ -78,7 +96,7 @@ class _ChaseScreenState extends State<ChaseScreen> {
                   border: Border.all(color: AppColors.blue.withOpacity(0.2))),
               child: RichText(
                 text: TextSpan(
-                  style: const TextStyle(fontFamily: 'Syne', fontSize: 13, color: AppColors.blue),
+                  style: const TextStyle(fontFamily: 'Roboto', fontSize: 13, color: AppColors.blue),
                   children: [
                     TextSpan(text: inv.client, style: const TextStyle(fontWeight: FontWeight.w700)),
                     TextSpan(text: ' (${inv.email}) owes '),
@@ -95,7 +113,7 @@ class _ChaseScreenState extends State<ChaseScreen> {
             const SizedBox(height: 20),
 
             // Channel selector
-            const Text('SEND VIA', style: TextStyle(fontFamily: 'Syne', fontSize: 9, color: AppColors.muted, letterSpacing: 1.0)),
+            const Text('SEND VIA', style: TextStyle(fontFamily: 'Roboto', fontSize: 9, color: AppColors.muted, letterSpacing: 1.0)),
             const SizedBox(height: 8),
             Row(
               children: _channels.map((ch) {
@@ -115,7 +133,7 @@ class _ChaseScreenState extends State<ChaseScreen> {
                         Icon(ch['icon'] as IconData, size: 16, color: active ? AppColors.accent : AppColors.muted),
                         const SizedBox(height: 3),
                         Text(ch['label'] as String,
-                            style: TextStyle(fontFamily: 'Syne', fontSize: 11, fontWeight: FontWeight.w600,
+                            style: TextStyle(fontFamily: 'Roboto', fontSize: 11, fontWeight: FontWeight.w600,
                                 color: active ? AppColors.accent : AppColors.muted)),
                       ]),
                     ),
@@ -137,7 +155,7 @@ class _ChaseScreenState extends State<ChaseScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(_channel.toUpperCase() + ' MESSAGE',
-                            style: const TextStyle(fontFamily: 'Syne', fontSize: 9, color: AppColors.muted, letterSpacing: 1.0)),
+                            style: const TextStyle(fontFamily: 'Roboto', fontSize: 9, color: AppColors.muted, letterSpacing: 1.0)),
                         GestureDetector(
                           onTap: _generating ? null : _generate,
                           child: Container(
@@ -148,7 +166,7 @@ class _ChaseScreenState extends State<ChaseScreen> {
                                 : const Row(mainAxisSize: MainAxisSize.min, children: [
                                     Icon(Icons.auto_awesome, size: 12, color: Colors.white),
                                     SizedBox(width: 4),
-                                    Text('AI Write', style: TextStyle(fontFamily: 'Syne', fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white)),
+                                    Text('AI Write', style: TextStyle(fontFamily: 'Roboto', fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white)),
                                   ]),
                           ),
                         ),
@@ -160,11 +178,11 @@ class _ChaseScreenState extends State<ChaseScreen> {
                     maxLines: 8,
                     decoration: const InputDecoration(
                       hintText: "Click 'AI Write' to generate a message, or type your own...",
-                      hintStyle: TextStyle(fontFamily: 'Syne', fontSize: 13, color: AppColors.muted2, fontStyle: FontStyle.italic),
+                      hintStyle: TextStyle(fontFamily: 'Roboto', fontSize: 13, color: AppColors.muted2, fontStyle: FontStyle.italic),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.all(12),
                     ),
-                    style: const TextStyle(fontFamily: 'Syne', fontSize: 13, color: AppColors.ink, height: 1.7),
+                    style: const TextStyle(fontFamily: 'Roboto', fontSize: 13, color: AppColors.ink, height: 1.7),
                   ),
                 ],
               ),
@@ -275,7 +293,7 @@ class _BulkChaseScreenState extends State<BulkChaseScreen> {
                             ),
                             alignment: Alignment.center,
                             child: Text(ch.toUpperCase(),
-                                style: TextStyle(fontFamily: 'Syne', fontSize: 11, fontWeight: FontWeight.w600,
+                                style: TextStyle(fontFamily: 'Roboto', fontSize: 11, fontWeight: FontWeight.w600,
                                     color: _channel == ch ? AppColors.accent : AppColors.muted)),
                           ),
                         ),
@@ -316,14 +334,14 @@ class _BulkChaseScreenState extends State<BulkChaseScreen> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                Text(inv.client, style: const TextStyle(fontFamily: 'Syne', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.ink)),
+                                Text(inv.client, style: const TextStyle(fontFamily: 'Roboto', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.ink)),
                                 Text('\$${inv.remaining.toStringAsFixed(2)} · ${inv.daysOverdue}d overdue · Chase #${inv.chases + 1}',
-                                    style: const TextStyle(fontFamily: 'Syne', fontSize: 11, color: AppColors.muted)),
+                                    style: const TextStyle(fontFamily: 'Roboto', fontSize: 11, color: AppColors.muted)),
                               ]),
                             ),
                             Text(
                               status == 'done' ? '✓ Done' : status == 'generating' ? 'Writing...' : status == 'error' ? '✗ Error' : 'Queued',
-                              style: TextStyle(fontFamily: 'Syne', fontSize: 11, fontWeight: FontWeight.w600,
+                              style: TextStyle(fontFamily: 'Roboto', fontSize: 11, fontWeight: FontWeight.w600,
                                   color: status == 'done' ? AppColors.green : status == 'error' ? AppColors.accent : AppColors.muted),
                             ),
                           ],
@@ -342,7 +360,7 @@ class _BulkChaseScreenState extends State<BulkChaseScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text('$_done of ${widget.invoices.length} processed...',
-                        style: const TextStyle(fontFamily: 'Syne', fontSize: 12, color: AppColors.muted)),
+                        style: const TextStyle(fontFamily: 'Roboto', fontSize: 12, color: AppColors.muted)),
                   ],
 
                   const SizedBox(height: 12),
@@ -375,8 +393,8 @@ class _BulkChaseScreenState extends State<BulkChaseScreen> {
         decoration: BoxDecoration(color: AppColors.surface, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(8)),
         alignment: Alignment.center,
         child: Column(children: [
-          Text(val, style: TextStyle(fontFamily: 'Syne', fontSize: 18, fontWeight: FontWeight.w800, color: color)),
-          Text(lbl, style: const TextStyle(fontFamily: 'Syne', fontSize: 10, color: AppColors.muted)),
+          Text(val, style: TextStyle(fontFamily: 'Roboto', fontSize: 18, fontWeight: FontWeight.w800, color: color)),
+          Text(lbl, style: const TextStyle(fontFamily: 'Roboto', fontSize: 10, color: AppColors.muted)),
         ]),
       ),
     );
