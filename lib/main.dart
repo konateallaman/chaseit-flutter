@@ -349,7 +349,7 @@ class _MainShellState extends State<MainShell> {
         backgroundColor: AppColors.surface,
         elevation: 0,
         titleSpacing: 16,
-        title: Row(children: [
+        title: Row(mainAxisSize: MainAxisSize.min, children: [
           Container(width: 26, height: 26,
               decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(7)),
               child: const Icon(Icons.timer_outlined, size: 14, color: Colors.white)),
