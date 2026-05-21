@@ -356,52 +356,108 @@ class _MainShellState extends State<MainShell> {
           const SizedBox(width: 8),
           const Text('ChaseIt', style: TextStyle(fontFamily: 'Syne', fontSize: 17,
               fontWeight: FontWeight.w800, color: AppColors.ink, letterSpacing: -0.5)),
+          if (overdueCount > 0) ...[
+            const SizedBox(width: 6),
+            Container(
+              width: 18, height: 18,
+              decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
+              alignment: Alignment.center,
+              child: Text('$overdueCount', style: const TextStyle(
+                  fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white)),
+            ),
+          ],
         ]),
         actions: [
-          if (overdueCount > 0)
-            IconButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(
-                  builder: (_) => BulkChaseScreen(invoices: state.overdueInvoices))),
-              tooltip: 'Run Chasers',
-              icon: Stack(clipBehavior: Clip.none, children: [
-                const Icon(Icons.auto_awesome, color: AppColors.yellow, size: 22),
-                Positioned(right: -4, top: -4,
-                  child: Container(width: 15, height: 15,
-                      decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
-                      alignment: Alignment.center,
-                      child: Text('$overdueCount', style: const TextStyle(
-                          fontSize: 8, fontWeight: FontWeight.w800, color: Colors.white))),
-                ),
+          // New Invoice button — always visible
+          GestureDetector(
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const InvoiceFormScreen())),
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 11),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                  color: AppColors.accent, borderRadius: BorderRadius.circular(8)),
+              child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Icons.add, size: 13, color: Colors.white),
+                SizedBox(width: 4),
+                Text('Invoice', style: TextStyle(fontFamily: 'Syne',
+                    fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
               ]),
             ),
-          IconButton(
-            onPressed: () => _showAddClientDialog(context),
-            tooltip: 'Add Client',
-            icon: const Icon(Icons.person_add_outlined, color: AppColors.muted, size: 22),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: GestureDetector(
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const InvoiceFormScreen())),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(8)),
-                child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.add, size: 14, color: Colors.white),
-                  SizedBox(width: 4),
-                  Text('Invoice', style: TextStyle(fontFamily: 'Syne',
-                      fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
+          const SizedBox(width: 4),
+          // Hamburger menu
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.menu, color: AppColors.ink),
+            color: AppColors.surface,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            onSelected: (value) async {
+              switch (value) {
+                case 'client':
+                  _showAddClientDialog(context);
+                  break;
+                case 'chase':
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (_) => BulkChaseScreen(invoices: state.overdueInvoices)));
+                  break;
+                case 'logout':
+                  _confirmLogout(context);
+                  break;
+              }
+            },
+            itemBuilder: (_) => [
+              if (overdueCount > 0)
+                PopupMenuItem(
+                  value: 'chase',
+                  child: Row(children: [
+                    Container(
+                      width: 32, height: 32,
+                      decoration: BoxDecoration(
+                          color: AppColors.yellowBg, borderRadius: BorderRadius.circular(8)),
+                      child: const Icon(Icons.auto_awesome, size: 16, color: AppColors.yellow),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const Text('Run Chasers', style: TextStyle(fontFamily: 'Syne',
+                          fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.ink)),
+                      Text('$overdueCount overdue invoice${overdueCount > 1 ? 's' : ''}',
+                          style: const TextStyle(fontFamily: 'Syne',
+                              fontSize: 11, color: AppColors.muted)),
+                    ]),
+                  ]),
+                ),
+              PopupMenuItem(
+                value: 'client',
+                child: Row(children: [
+                  Container(
+                    width: 32, height: 32,
+                    decoration: BoxDecoration(
+                        color: AppColors.blueBg, borderRadius: BorderRadius.circular(8)),
+                    child: const Icon(Icons.person_add_outlined, size: 16, color: AppColors.blue),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('Add Client', style: TextStyle(fontFamily: 'Syne',
+                      fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.ink)),
                 ]),
               ),
-            ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'logout',
+                child: Row(children: [
+                  Container(
+                    width: 32, height: 32,
+                    decoration: BoxDecoration(
+                        color: AppColors.accentBg, borderRadius: BorderRadius.circular(8)),
+                    child: const Icon(Icons.logout, size: 16, color: AppColors.accent),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('Sign Out', style: TextStyle(fontFamily: 'Syne',
+                      fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.accent)),
+                ]),
+              ),
+            ],
           ),
-          // Logout
-          IconButton(
-            onPressed: () => _confirmLogout(context),
-            tooltip: 'Logout',
-            icon: const Icon(Icons.logout, color: AppColors.muted, size: 22),
-          ),
+          const SizedBox(width: 4),
         ],
       ),
       body: _screen(),

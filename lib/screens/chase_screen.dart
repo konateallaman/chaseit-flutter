@@ -33,7 +33,7 @@ class _ChaseScreenState extends State<ChaseScreen> {
     setState(() { _generating = true; _msgController.clear(); });
     try {
       final msg = await AiService.generateChaseMessage(invoice: widget.invoice, channel: _channel);
-      _msgController.text = msg;
+      _msgController.text = msg ?? '';
     } catch (e) {
       _msgController.text = 'Error generating message. Check your API connection and try again.';
     }

@@ -90,12 +90,15 @@ class DashboardScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Recent Invoices',
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
-                        fontFamily: 'Syne')),
+                const Expanded(
+                  child: Text('Recent Invoices',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.ink,
+                          fontFamily: 'Syne')),
+                ),
                 TextButton(
                   onPressed: () {},
                   child: const Text('View all →',
@@ -119,29 +122,35 @@ class DashboardScreen extends StatelessWidget {
             if (overdue.isNotEmpty) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text('🔥  Needs attention',
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.ink,
-                          fontFamily: 'Syne')),
+                  const Expanded(
+                    child: Text('🔥  Needs attention',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.ink,
+                            fontFamily: 'Syne')),
+                  ),
+                  const SizedBox(width: 8),
                   GestureDetector(
                     onTap: () => Navigator.push(context,
                         MaterialPageRoute(builder: (_) => BulkChaseScreen(invoices: overdue))),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       decoration: BoxDecoration(
                         color: AppColors.yellowBg,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: AppColors.yellow.withOpacity(0.3)),
                       ),
                       child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                        Icon(Icons.auto_awesome, size: 12, color: AppColors.yellow),
-                        SizedBox(width: 4),
-                        Text('Run Chasers Now',
+                        Icon(Icons.auto_awesome, size: 11, color: AppColors.yellow),
+                        SizedBox(width: 3),
+                        Text('Run Chasers',
                             style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 10,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.yellow,
                                 fontFamily: 'Syne')),
@@ -341,18 +350,18 @@ class DashboardScreen extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 9),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.zero,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 2),
+        decoration: BoxDecoration(color: bg),
         alignment: Alignment.center,
-        child: Text(label,
-            style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: fg,
-                fontFamily: 'Syne')),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(label,
+              style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: fg,
+                  fontFamily: 'Syne')),
+        ),
       ),
     );
   }
