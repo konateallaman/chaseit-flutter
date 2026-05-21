@@ -19,8 +19,6 @@ class AiService {
           'client': invoice.client,
           'amount': invoice.remaining,
           'due': invoice.due,
-          'invoiceNum': invoice.num,
-          'description': invoice.desc,
           'sender': senderName.isNotEmpty ? senderName : invoice.sender,
           'tone': tone.isNotEmpty ? tone : invoice.seq,
           'channel': channel,

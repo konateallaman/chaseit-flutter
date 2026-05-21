@@ -29364,7 +29364,7 @@ h=B.d.cv(a0.d-a0.e,0,1/0)
 g=J.ce(d)!==0?d:a0.w
 f=J.ce(c)!==0?c:a0.y
 s=7
-return A.o(A.tP(k,B.ad.i7(A.am(["client",a0.b,"amount",h,"due",a0.f,"invoiceNum",a0.x,"description",a0.r,"sender",g,"tone",f,"channel",a,"chaseNum",a0.Q+1],j,t.K),null),i),$async$Lh)
+return A.o(A.tP(k,B.ad.i7(A.am(["client",a0.b,"amount",h,"due",a0.f,"sender",g,"tone",f,"channel",a,"chaseNum",a0.Q+1],j,t.K),null),i),$async$Lh)
 case 7:n=a2
 if(n.b===200){k=n
 m=B.ad.iM(0,A.i1(A.i_(k.e)).d1(0,k.w),null)
